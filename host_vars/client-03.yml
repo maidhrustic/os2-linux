@@ -1,0 +1,9 @@
+ansible_host: 192.168.192.138
+
+wordpress_site_dir: /var/www/html
+wordpress_db_name: wordpress
+wordpress_db_user: wpuser
+wordpress_db_password: "Changeme123!"   # liever via ansible-vault
+wordpress_db_host: localhost
+wordpress_url: "https://wordpress.org/latest.tar.gz"
+

@@ -1,0 +1,4 @@
+---
+- name: Import update task
+  import_tasks: 'update_playbook.yml'
+  tags: update

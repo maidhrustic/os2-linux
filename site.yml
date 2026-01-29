@@ -1,24 +1,28 @@
 ---
-- name: Tags for the monitoring server
+- name: Update monitoring machines
+  hosts: monitoring
+  gather_facts: true
+  become: true
+  become_method: sudo
+  roles:
+    - {role: 'update', tags: ['update']}
+
+- name: Monitoring Servers setup
   hosts: monitoring_servers
   gather_facts: true
   become: true
   become_method: sudo
   roles:
-    - {role: 'prometheus_server', tags: ['all']}
+    - {role: 'prometheus_server', tags: ['prometheus']}
+    - {role: 'grafana_server', tags: ['grafana']}
 
-- name: Tags for the monitoring clienhts
+
+- name: Monitoring Clients setup
   hosts: monitoring_clients
   gather_facts: true
   become: true
   become_method: sudo
   roles:
-    - {role: 'prometheus_client', tags: ['all']}
-
-- name: Tags for the grafana server
-  hosts: monitoring_servers
-  gather_facts: true
-  become: true
-  become_method: sudo
-  roles:
-    - {role: 'grafana_server', tags: ['all']}
+    - {role: 'prometheus_client', tags: ['node_exporter']}
+    - {role: 'docker', tags: ['docker']}
+    - {role: 'wordpress', tags: ['wordpress']}

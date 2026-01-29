@@ -1,0 +1,30 @@
+---
+- name: Include specific OS variables
+  include_vars: "vars/{{ ansible_os_family }}.yml"
+
+- name: Install required packages
+  apt:
+    name: "{{ system_packages + docker_packages }}"
+    state: present
+  when: ansible_os_family == "Debian"
+
+- name: chmod the docker socket
+  file:
+    path: /var/run/docker.sock
+    mode: '0666'
+  when: ansible_os_family == "Debian"
+
+- name: Ensure Docker service is started and enabled
+  service:
+    name: docker
+    state: started
+    enabled: yes
+  when: ansible_os_family == "Debian"
+
+- name: Add user to docker group
+  user:
+    name: "{{ ansible_user }}"
+    groups: docker
+    append: yes
+  when: ansible_os_family == "Debian"
+

@@ -1,0 +1,4 @@
+---
+- name: Import WP task
+  import_tasks: install_wordpress.yml
+  tags: wordpress

@@ -1,0 +1,8 @@
+---
+- name: Import docker setup tasks
+  import_tasks: docker_setup.yml
+  tags: docker
+
+- name: Import nginx container tasks
+  import_tasks: nginx_container.yml
+  tags: nginx

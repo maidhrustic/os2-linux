@@ -2,7 +2,8 @@
 system_packages:
   - curl
   - net-tools
-  - '@Development Tools'
+  - "@Development Tools"
   - vim
   - git
   - python3-pip
+  - ntpstat

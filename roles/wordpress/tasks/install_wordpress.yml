@@ -1,0 +1,105 @@
+---
+- name: Include specific OS variables
+  include_vars: "vars/{{ ansible_os_family }}.yml"
+
+- name: install dependencies
+  apt:
+    name: "{{ wordpress_packages }}"
+    state: present
+
+- name: Enable and start services
+  service:
+    name: "{{ item }}"
+    state: started
+    enabled: true
+  loop:
+    - apache2
+    - mariadb
+
+- name: Create WP database
+  mysql_db:
+    name: "{{ wordpress_db_name }}"
+    state: present
+    login_unix_socket: /var/run/mysqld/mysqld.sock
+
+- name: Create WP database user
+  mysql_user:
+    name: "{{ wordpress_db_user }}"
+    password: "{{ wordpress_db_password }}"
+    priv: "{{ wordpress_db_name }}.*:ALL"
+    host: "{{ wordpress_db_host }}"
+    state: present
+    login_unix_socket: /var/run/mysqld/mysqld.sock
+
+- name: Download latest WordPress
+  get_url:
+    url: "{{ wordpress_url }}"
+    dest: /tmp/wordpress.tar.gz
+    mode: '0644'
+
+- name: Extract WordPress
+  unarchive:
+    src: /tmp/wordpress.tar.gz
+    dest: "{{ wordpress_site_dir}}"
+    remote_src: yes
+
+- name: move wordpress files to site root
+  copy:
+    src: "{{ wordpress_site_dir }}/wordpress/"
+    dest: "{{ wordpress_site_dir }}"
+    remote_src: yes
+
+- name: remove the original index.html
+  file:
+    path: "{{ wordpress_site_dir }}/index.html"
+    state: absent
+
+- name: remove wordpress directory
+  file:
+    path: "{{ wordpress_site_dir }}/wordpress"
+    state: absent
+
+- name: change permissions
+  file:
+    path: "{{ wordpress_site_dir }}"
+    owner: www-data
+    group: www-data
+    recurse: yes
+    mode: '0755'
+
+- name: Create wp-config.php from sample
+  copy:
+    src: "{{ wordpress_site_dir }}/wp-config-sample.php"
+    dest: "{{ wordpress_site_dir }}/wp-config.php"
+    remote_src: true
+    owner: www-data
+    group: www-data
+    mode: "0644"
+    force: false
+
+- name: Configure database settings in wp-config.php
+  replace:
+    path: "{{ wordpress_site_dir }}/wp-config.php"
+    regexp: "{{ item.regexp }}"
+    replace: "{{ item.replace }}"
+  loop:
+    - { regexp: "database_name_here", replace: "{{ wordpress_db_name }}" }
+    - { regexp: "username_here",      replace: "{{ wordpress_db_user }}" }
+    - { regexp: "password_here",      replace: "{{ wordpress_db_password }}" }
+    - { regexp: "localhost",          replace: "{{ wordpress_db_host }}" }
+
+- name: Enable Apache rewrite module
+  command: a2enmod rewrite
+  register: rewrite_mod
+  changed_when: rewrite_mod.rc == 0 and ("already enabled" not in rewrite_mod.stdout | default(""))
+
+- name: start and enable apache
+  service:
+    name: apache2
+    state: started
+    enabled: true
+
+- name: restart apache
+  service:
+    name: apache2
+    state: restarted

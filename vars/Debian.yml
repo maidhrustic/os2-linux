@@ -1,9 +1,29 @@
 ---
 system_packages:
-  - curl
-  - net-tools
-  - build-essential
-  - vim
-  - git
   - python3
   - python3-pip
+  - python3-setuptools
+  - python3-venv
+  - ca-certificates
+  - curl
+
+
+docker_packages:
+  - docker.io
+  - python3-docker
+  - python3-requests-unixsocket
+
+wordpress_packages:
+  - apache2
+  - mariadb-server
+  - wget
+  - tar
+  - unzip
+  - php
+  - php-mysql
+  - php-gd
+  - php-curl
+  - php-xml
+  - php-mbstring
+  - libapache2-mod-php
+  - python3-pymysql

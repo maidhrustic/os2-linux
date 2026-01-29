@@ -1,0 +1,10 @@
+---
+- name: Pull nginx image
+  shell: docker pull nginx
+
+- name: Run nginx container
+  shell: docker run -d -p 8080:80 --name nginx_container nginx
+
+# we konden community.docker collection niet gebruiken omdat deze steeds een fout aangaf namelijk:
+# "msg": "Error connecting: Error while fetching server API version: Not supported URL scheme http+docker"
+# terwijl docker versie prima is, python3 packages zijn ook allemaal up to date en de docker daemon draait ook prima.
