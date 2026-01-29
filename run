@@ -1,0 +1,4 @@
+#!/bin/bash
+
+set -eu
+time ansible-playbook -i hosts.yml site.yml --ask-vault-pass "$@"

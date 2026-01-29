@@ -1,0 +1,80 @@
+---
+- name: Install dependencies
+  apt:
+    name:
+      - curl
+      - gnupg
+      - apt-transport-https
+    state: present
+    update_cache: true
+
+- name: Ensure keyring dir exists
+  file:
+    path: /etc/apt/keyrings
+    state: directory
+    mode: "0755"
+
+- name: Add Grafana GPG key
+  get_url:
+    url: https://apt.grafana.com/gpg.key
+    dest: /tmp/grafana.key
+
+- name: Convert GPG key
+  command:
+    cmd: gpg --dearmor -o /etc/apt/keyrings/grafana.gpg /tmp/grafana.key
+  args:
+    creates: /etc/apt/keyrings/grafana.gpg
+
+- name: Add Grafana repo
+  copy:
+    dest: /etc/apt/sources.list.d/grafana.list
+    content: |
+      deb [signed-by=/etc/apt/keyrings/grafana.gpg] https://apt.grafana.com stable main
+
+- name: Update apt cache
+  apt:
+    update_cache: true
+
+- name: Install Grafana
+  apt:
+    name: grafana
+    state: present
+    update_cache: true
+
+- name: Ensure Grafana is enabled and started
+  service:
+    name: grafana-server
+    state: started
+    enabled: true
+
+- name: Set Grafana admin password (idempotent-ish)
+  lineinfile:
+    path: /etc/grafana/grafana.ini
+    regexp: '^;?admin_password ='
+    line: "admin_password = {{ grafana_admin_password }}"
+
+# Provision datasource so you don't have to click in the UI
+- name: Ensure provisioning directories exist
+  file:
+    path: /etc/grafana/provisioning/datasources
+    state: directory
+    mode: "0755"
+
+- name: Provision Prometheus datasource
+  copy:
+    dest: /etc/grafana/provisioning/datasources/prometheus.yml
+    mode: "0644"
+    content: |
+      apiVersion: 1
+      datasources:
+        - name: Prometheus
+          type: prometheus
+          access: proxy
+          url: {{ prometheus_url }}
+          isDefault: true
+          editable: true
+
+- name: restart grafana
+  service:
+    name: grafana-server
+    state: restarted

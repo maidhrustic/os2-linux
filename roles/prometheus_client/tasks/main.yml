@@ -1,0 +1,8 @@
+---
+- name: Import the update playbook
+  import_tasks: update_playbook.yml
+  tags: update
+
+- name: Import the prometheus playbook
+  import_tasks: install_node_exporter.yml
+  tags: node_exporter

@@ -1,0 +1,5 @@
+ansible_user: ansible
+ansible_password: "{{ vault_ansible_password }}"
+ansible_ssh_private_key_file: ~/.ssh/id_ed25519_ansible
+ansible_become_password: "{{ vault_ansible_password }}"
+grafana_admin_password: "ChangeMe123!"   # liefst via vault

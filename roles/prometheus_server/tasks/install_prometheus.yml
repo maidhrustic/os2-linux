@@ -1,0 +1,55 @@
+- name: Install Prometheus (Debian)
+  apt:
+    name: prometheus
+    state: present
+    update_cache: true
+  when: ansible_os_family == "Debian"
+
+- name: Install Prometheus (RedHat)
+  yum:
+    name: prometheus
+    state: present
+  when: ansible_os_family == "RedHat"
+
+- name: Ensure targets directory exists
+  file:
+    path: "{{ prometheus_targets_dir }}"
+    state: directory
+    mode: "0755"
+
+- name: Write Prometheus config with file_sd
+  copy:
+    dest: "{{ prometheus_config }}"
+    mode: "0644"
+    content: |
+      global:
+        scrape_interval: 15s
+
+      scrape_configs:
+        - job_name: "prometheus"
+          static_configs:
+            - targets: ["localhost:9090"]
+
+        - job_name: "node"
+          file_sd_configs:
+            - files:
+                - "{{ prometheus_targets_file }}"
+
+- name: Create an empty targets.json if missing
+  copy:
+    dest: "{{ prometheus_targets_file }}"
+    mode: "0644"
+    content: |
+      []
+    force: false
+
+- name: Ensure Prometheus service enabled and running
+  service:
+    name: prometheus
+    state: started
+    enabled: true
+
+- name: restart prometheus
+  service:
+    name: prometheus
+    state: restarted

@@ -1,0 +1,5 @@
+ansible_host: 192.168.192.130
+prometheus_config: /etc/prometheus/prometheus.yml
+prometheus_targets_dir: /etc/prometheus/targets
+prometheus_targets_file: /etc/prometheus/targets/targets.json
+prometheus_url: "http://localhost:9090"  # Prometheus draait op dezelfde server

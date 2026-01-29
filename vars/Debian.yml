@@ -1,0 +1,9 @@
+---
+system_packages:
+  - curl
+  - net-tools
+  - build-essential
+  - vim
+  - git
+  - python3
+  - python3-pip

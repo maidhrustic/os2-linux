@@ -1,0 +1,27 @@
+---
+- name: Build targets list from inventory clients
+  set_fact:
+    prometheus_targets: >-
+      {{
+        groups['monitoring_clients']
+        | map('extract', hostvars, 'ansible_host')
+        | map('regex_replace', '$', ':9100')
+        | list
+      }}
+
+- name: Write targets.json (auto registration)
+  copy:
+    dest: "{{ prometheus_targets_file }}"
+    mode: "0644"
+    content: |
+      [
+        {
+          "targets": {{ prometheus_targets | to_json }},
+          "labels": { "job": "node" }
+        }
+      ]
+
+- name: restart prometheus to apply new config
+  service:
+    name: prometheus
+    state: restarted

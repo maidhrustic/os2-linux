@@ -1,0 +1,9 @@
+---
+- name: Import the update playbook
+  import_tasks: update_playbook.yml
+  tags: update
+
+- name: Import Grafana playbook # Debian only
+  import_tasks: install_grafana.yml
+  tags: grafana
+  when: ansible_facts['os_family'] == "Debian"
